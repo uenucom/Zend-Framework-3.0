@@ -173,22 +173,27 @@ Create a virtual host configuration file for your project under `/path/to/nginx/
 it should look something like below:
 
 ```nginx
+
 server {
-    listen       80;
-    server_name  zfapp.localhost;
-    root         /path/to/zfapp/public;
+  listen 80;
+  server_name  zfapp.localhost d.uenu.com;
+  root /home/work/www/zf3/public;
+  location / {
+        index index.php index.html index.htm;
+        try_files $uri $uri/ /index.php?$args;
+  }  
+  access_log  /home/work/logs/default_access.log  main;
+  error_log  /home/work/logs/default_error.log  crit;
+  
 
-    location / {
-        index index.php;
-        try_files $uri $uri/ @php;
-    }
-
-    location @php {
-        # Pass the PHP requests to FastCGI server (php-fpm) on 127.0.0.1:9000
-        fastcgi_pass   127.0.0.1:9000;
-        fastcgi_param  SCRIPT_FILENAME /path/to/zfapp/public/index.php;
-        include fastcgi_params;
-    }
+  location ~ \.php$ {
+            fastcgi_pass   127.0.0.1:9000;
+            #fastcgi_pass   unix:/dev/shm/php-cgi7.sock;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME   $document_root$fastcgi_script_name;
+            include        fastcgi_params;
+            client_max_body_size 10m;
+        }
 }
 ```
 
